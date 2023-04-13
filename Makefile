@@ -6,7 +6,7 @@ LAMBDA_EXE	= $(LAMBDA)
 LAMBDA_GO	= $(LAMBDA).go
 LAMBDA_ZIP	= $(LAMBDA).zip
 
-all: format zip
+all: zip
 
 build:
 	CGO_ENABLED=0 \
