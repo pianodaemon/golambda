@@ -6,9 +6,9 @@ LAMBDA_EXE	= $(LAMBDA)
 LAMBDA_GO	= $(LAMBDA).go
 LAMBDA_ZIP	= $(LAMBDA).zip
 
-all: build
+all: format zip
 
-build: fmt
+build:
 	CGO_ENABLED=0 \
 	GOOS=linux \
 	GOARCH=amd64 \
@@ -17,7 +17,7 @@ build: fmt
 zip: build
 	zip $(LAMBDA_ZIP) $(LAMBDA_EXE)
 
-fmt:
+format:
 	$(GOCMD) fmt ./...
 
 clean:
