@@ -78,7 +78,7 @@ func handleMessage(msg *events.SQSMessage) (merr error) {
 		}
 	}()
 
-	target := forwarders.TargetsLookUp[forwarders.FORWARD_KAFKA]
+	target := forwarders.TargetsLookUp[forwarders.TARGET_SQS]
 	target.Forward(msg.Body)
 
 	fmt.Printf("The message %s for event source %s = %s \n", msg.MessageId, msg.EventSource, msg.Body)

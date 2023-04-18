@@ -1,8 +1,9 @@
 package forwarders
 
 const (
-	FORWARD_KAFKA = iota
-	FORWARD_TARGET_MAX
+	TARGET_KAFKA = iota
+	TARGET_SQS
+	TARGET_MAX
 )
 
 type (
@@ -12,6 +13,7 @@ type (
 	}
 )
 
-var TargetsLookUp = [FORWARD_TARGET_MAX]*Target{
+var TargetsLookUp = [TARGET_MAX]*Target{
 	&Target{"Kafka confluent", toKafka},
+	&Target{"SQS aws", toSqs},
 }
