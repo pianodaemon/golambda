@@ -1,15 +1,15 @@
-package rerouting
+package forwarders
 
 import (
 	"fmt"
-	"github.com/aws/aws-lambda-go/events"
+
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func process(msg *events.SQSMessage) {
+func toKafka(payload string) {
 
 	config := &kafka.ConfigMap{
-		"bootstrap.servers": "localhost"
+		"bootstrap.servers": "localhost",
 	}
 
 	p, err := kafka.NewProducer(config)
@@ -45,4 +45,3 @@ func process(msg *events.SQSMessage) {
 	// Wait for message deliveries before shutting down
 	p.Flush(5 * 1000)
 }
-

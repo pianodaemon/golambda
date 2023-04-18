@@ -9,7 +9,7 @@ LAMBDA_ZIP	= $(LAMBDA).zip
 all: zip
 
 build:
-	CGO_ENABLED=0 \
+	CGO_ENABLED=1 \
 	GOOS=linux \
 	GOARCH=amd64 \
 	$(GOBUILD) -o $(LAMBDA_EXE) lambda/$(LAMBDA_GO)

@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"immortalcrab.com/eventrouter/internal/rerouting"
+	"immortalcrab.com/eventrouter/internal/forwarders"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -78,7 +78,9 @@ func handleMessage(msg *events.SQSMessage) (merr error) {
 		}
 	}()
 
-	rerouting.process(msg)
+	target := forwarders.TargetsLookUp[forwarders.FORWARD_KAFKA]
+	target.Forward(msg.Body)
+
 	fmt.Printf("The message %s for event source %s = %s \n", msg.MessageId, msg.EventSource, msg.Body)
 	return nil
 }
