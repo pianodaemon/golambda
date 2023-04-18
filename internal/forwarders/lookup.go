@@ -13,5 +13,5 @@ type (
 )
 
 var TargetsLookUp = [FORWARD_TARGET_MAX]*Target{
-	&Target{"Kafka concluent", toKafka},
+	&Target{"Kafka confluent", toKafka},
 }
