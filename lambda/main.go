@@ -4,10 +4,15 @@ import (
 	"context"
 	"fmt"
 	"os"
+	"sync"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
 )
+
+// Buffer size of the channel to take over of the concurrency limit
+// by using a channel that can be treated as a kind of pseudo semaphore.
+const MaxEngagements = 10
 
 type (
 	MessageHandler func(msg *events.SQSMessage) error
@@ -15,20 +20,46 @@ type (
 
 func mapForEachMessage(records []events.SQSMessage, actOn MessageHandler) (events.SQSEventResponse, error) {
 
+	var wg sync.WaitGroup
+	pseudoSem := make(chan struct{}, MaxEngagements)
+	errMsgIdChannel := make(chan string, len(records))
 	sqsBatchResponse := events.SQSEventResponse{
 		BatchItemFailures: make([]events.SQSBatchItemFailure, 0),
 	}
 
-	for _, msg := range records {
-		err := actOn(&msg)
-		if err != nil {
-			emsg := fmt.Sprintf("Exception handling message with id %s", msg.MessageId)
-			fmt.Fprintf(os.Stderr, "%s\n%s\n", emsg, err.Error())
-			failure := &events.SQSBatchItemFailure{
-				ItemIdentifier: msg.MessageId,
+	engage := func(msg *events.SQSMessage) {
+		pseudoSem <- struct{}{}
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			defer func() {
+				<-pseudoSem
+			}()
+
+			err := actOn(msg)
+			if err != nil {
+				emsg := fmt.Sprintf("Exception handling message with id %s", msg.MessageId)
+				fmt.Fprintf(os.Stderr, "%s: %s\n", emsg, err.Error())
+				errMsgIdChannel <- msg.MessageId
 			}
-			sqsBatchResponse.BatchItemFailures = append(sqsBatchResponse.BatchItemFailures, *failure)
+		}()
+	}
+
+	for _, msg := range records {
+		engage(&msg)
+	}
+
+	go func() {
+		defer close(pseudoSem)
+		defer close(errMsgIdChannel)
+		wg.Wait()
+	}()
+
+	for msgId := range errMsgIdChannel {
+		failure := &events.SQSBatchItemFailure{
+			ItemIdentifier: msgId,
 		}
+		sqsBatchResponse.BatchItemFailures = append(sqsBatchResponse.BatchItemFailures, *failure)
 	}
 
 	return sqsBatchResponse, nil
