@@ -12,7 +12,10 @@ import (
 
 // Buffer size of the channel to take over of the concurrency limit
 // by using a channel that can be treated as a kind of pseudo semaphore.
-const MaxEngagements = 10
+// The number of simultaneous concurrent actions that can be efficiently
+// processed will vary depending on the Lambda runtime resources
+// https://docs.aws.amazon.com/lambda/latest/dg/gettingstarted-limits.html
+const MaxActions = 100
 
 type (
 	MessageHandler func(msg *events.SQSMessage) error
@@ -21,13 +24,13 @@ type (
 func mapForEachMessage(records []events.SQSMessage, actOn MessageHandler) (events.SQSEventResponse, error) {
 
 	var wg sync.WaitGroup
-	pseudoSem := make(chan struct{}, MaxEngagements)
+	pseudoSem := make(chan struct{}, MaxActions)
 	errMsgIdChannel := make(chan string, len(records))
 	sqsBatchResponse := events.SQSEventResponse{
 		BatchItemFailures: make([]events.SQSBatchItemFailure, 0),
 	}
 
-	engage := func(msg *events.SQSMessage) {
+	action := func(msg *events.SQSMessage) {
 		pseudoSem <- struct{}{}
 		wg.Add(1)
 		go func() {
@@ -46,7 +49,7 @@ func mapForEachMessage(records []events.SQSMessage, actOn MessageHandler) (event
 	}
 
 	for _, msg := range records {
-		engage(&msg)
+		action(&msg)
 	}
 
 	go func() {
