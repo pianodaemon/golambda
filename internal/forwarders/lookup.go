@@ -2,6 +2,7 @@ package forwarders
 
 import (
 	"context"
+	"os"
 
 	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
@@ -24,8 +25,16 @@ var TargetsLookUp = make([]Target, TARGET_MAX)
 
 func init() {
 
+	getEnv := func(key, fallback string) string {
+		if value, ok := os.LookupEnv(key); ok {
+			return value
+		}
+		return fallback
+	}
+
+	kafkaServers := getEnv("KAFKA_SERVERS", "localhost:9092")
 	TargetsLookUp[TARGET_KAFKA] = NewDistEventStore(&kafka.ConfigMap{
-		"bootstrap.servers":            "localhost",
+		"bootstrap.servers":            kafkaServers,
 		"queue.buffering.max.messages": "1",
 		"queue.buffering.max.ms":       "1",
 	})
