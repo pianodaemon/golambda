@@ -34,11 +34,12 @@ func init() {
 
 	kafkaTopic := getEnv("KAFKA_TARGET_TOPIC", "internal_test")
 	kafkaServers := getEnv("KAFKA_SERVERS", "localhost:9092")
-	TargetsLookUp[TARGET_KAFKA] = NewTargetKafka(&kafka.ConfigMap{
+	configMap := &kafka.ConfigMap{
 		"bootstrap.servers":            kafkaServers,
 		"queue.buffering.max.messages": "1",
 		"queue.buffering.max.ms":       "1",
-	}, kafkaTopic)
+	}
+	TargetsLookUp[TARGET_KAFKA] = NewTargetKafka(configMap, kafkaTopic)
 
 	ctx := context.TODO()
 	cfg, err := config.LoadDefaultConfig(ctx)
