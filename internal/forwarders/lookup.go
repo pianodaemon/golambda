@@ -25,7 +25,9 @@ var TargetsLookUp = make([]Target, TARGET_MAX)
 func init() {
 
 	TargetsLookUp[TARGET_KAFKA] = NewDistEventStore(&kafka.ConfigMap{
-		"bootstrap.servers": "localhost",
+		"bootstrap.servers":            "localhost",
+		"queue.buffering.max.messages": "1",
+		"queue.buffering.max.ms":       "1",
 	})
 
 	ctx := context.TODO()
