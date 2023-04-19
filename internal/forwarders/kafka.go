@@ -7,27 +7,27 @@ import (
 )
 
 type (
-	DistEventStore struct {
+	TargetKafka struct {
 		name        string
 		targetTopic string
 		config      *kafka.ConfigMap
 	}
 )
 
-func NewDistEventStore(config *kafka.ConfigMap, targetTopic string) *DistEventStore {
+func NewTargetKafka(config *kafka.ConfigMap, targetTopic string) *TargetKafka {
 
-	return &DistEventStore{
+	return &TargetKafka{
 		name:        "Kafka confluent",
 		targetTopic: targetTopic,
 		config:      config,
 	}
 }
 
-func (self *DistEventStore) GetName() string {
+func (self *TargetKafka) GetName() string {
 	return self.name
 }
 
-func (self *DistEventStore) Forward(payload string) {
+func (self *TargetKafka) Forward(payload string) {
 
 	p, err := kafka.NewProducer(self.config)
 	if err != nil {

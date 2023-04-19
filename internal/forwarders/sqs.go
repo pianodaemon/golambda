@@ -10,7 +10,7 @@ import (
 )
 
 type (
-	CloudQueue struct {
+	TargetSQS struct {
 		name     string
 		client   *sqs.Client
 		queue    string
@@ -18,7 +18,7 @@ type (
 	}
 )
 
-func NewCloudQueue(queue string, cfg aws.Config) *CloudQueue {
+func NewTargetSQS(queue string, cfg aws.Config) *TargetSQS {
 
 	var client *sqs.Client = sqs.NewFromConfig(cfg)
 	gQInput := &sqs.GetQueueUrlInput{
@@ -31,7 +31,7 @@ func NewCloudQueue(queue string, cfg aws.Config) *CloudQueue {
 		panic(err)
 	}
 
-	return &CloudQueue{
+	return &TargetSQS{
 		name:     "SQS aws",
 		client:   client,
 		queue:    queue,
@@ -39,11 +39,11 @@ func NewCloudQueue(queue string, cfg aws.Config) *CloudQueue {
 	}
 }
 
-func (self *CloudQueue) GetName() string {
+func (self *TargetSQS) GetName() string {
 	return self.name
 }
 
-func (self *CloudQueue) Forward(payload string) {
+func (self *TargetSQS) Forward(payload string) {
 
 	sMInput := &sqs.SendMessageInput{
 		DelaySeconds: 10,

@@ -34,7 +34,7 @@ func init() {
 
 	kafkaTopic := getEnv("KAFKA_TARGET_TOPIC", "internal_test")
 	kafkaServers := getEnv("KAFKA_SERVERS", "localhost:9092")
-	TargetsLookUp[TARGET_KAFKA] = NewDistEventStore(&kafka.ConfigMap{
+	TargetsLookUp[TARGET_KAFKA] = NewTargetKafka(&kafka.ConfigMap{
 		"bootstrap.servers":            kafkaServers,
 		"queue.buffering.max.messages": "1",
 		"queue.buffering.max.ms":       "1",
@@ -46,5 +46,5 @@ func init() {
 		panic(err)
 	}
 
-	TargetsLookUp[TARGET_SQS] = NewCloudQueue("polito", cfg)
+	TargetsLookUp[TARGET_SQS] = NewTargetSQS("polito", cfg)
 }
