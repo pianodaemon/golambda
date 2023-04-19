@@ -1,5 +1,12 @@
 package forwarders
 
+import (
+	"context"
+
+	"github.com/aws/aws-sdk-go-v2/config"
+	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
+)
+
 const (
 	TARGET_KAFKA = iota
 	TARGET_SQS
@@ -7,13 +14,25 @@ const (
 )
 
 type (
-	Target struct {
-		Name    string
-		Forward func(payload string)
+	Target interface {
+		GetName() string
+		Forward(payload string)
 	}
 )
 
-var TargetsLookUp = [TARGET_MAX]*Target{
-	&Target{"Kafka confluent", toKafka},
-	&Target{"SQS aws", toSqs},
+var TargetsLookUp = make([]Target, TARGET_MAX)
+
+func init() {
+
+	TargetsLookUp[TARGET_KAFKA] = NewDistEventStore(&kafka.ConfigMap{
+		"bootstrap.servers": "localhost",
+	})
+
+	ctx := context.TODO()
+	cfg, err := config.LoadDefaultConfig(ctx)
+	if err != nil {
+		panic(err)
+	}
+
+	TargetsLookUp[TARGET_SQS] = NewCloudQueue("polito", cfg)
 }

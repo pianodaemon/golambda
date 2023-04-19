@@ -6,7 +6,7 @@ import (
 	"os"
 	"sync"
 
-	"immortalcrab.com/eventrouter/internal/forwarders"
+	fws "immortalcrab.com/eventrouter/internal/forwarders"
 
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
@@ -78,8 +78,7 @@ func handleMessage(msg *events.SQSMessage) (merr error) {
 		}
 	}()
 
-	target := forwarders.TargetsLookUp[forwarders.TARGET_SQS]
-	target.Forward(msg.Body)
+	fws.TargetsLookUp[fws.TARGET_SQS].Forward(msg.Body)
 
 	fmt.Printf("The message %s for event source %s = %s \n", msg.MessageId, msg.EventSource, msg.Body)
 	return nil

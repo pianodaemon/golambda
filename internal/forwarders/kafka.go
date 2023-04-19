@@ -6,13 +6,28 @@ import (
 	"github.com/confluentinc/confluent-kafka-go/v2/kafka"
 )
 
-func toKafka(payload string) {
-
-	config := &kafka.ConfigMap{
-		"bootstrap.servers": "localhost",
+type (
+	DistEventStore struct {
+		name   string
+		config *kafka.ConfigMap
 	}
+)
 
-	p, err := kafka.NewProducer(config)
+func NewDistEventStore(config *kafka.ConfigMap) *DistEventStore {
+
+	return &DistEventStore{
+		name:   "Kafka confluent",
+		config: config,
+	}
+}
+
+func (self *DistEventStore) GetName() string {
+	return self.name
+}
+
+func (self *DistEventStore) Forward(payload string) {
+
+	p, err := kafka.NewProducer(self.config)
 	if err != nil {
 		panic(err)
 	}

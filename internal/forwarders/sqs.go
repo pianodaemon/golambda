@@ -5,30 +5,45 @@ import (
 	"fmt"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
-	"github.com/aws/aws-sdk-go-v2/config"
 	"github.com/aws/aws-sdk-go-v2/service/sqs"
 	"github.com/aws/aws-sdk-go-v2/service/sqs/types"
 )
 
-var queue string = "queuepolito"
-
-func toSqs(payload string) {
-	ctx := context.TODO()
-	cfg, err := config.LoadDefaultConfig(ctx)
-	if err != nil {
-		panic(err)
+type (
+	CloudQueue struct {
+		name     string
+		client   *sqs.Client
+		queue    string
+		queueUrl *string
 	}
+)
+
+func NewCloudQueue(queue string, cfg aws.Config) *CloudQueue {
 
 	var client *sqs.Client = sqs.NewFromConfig(cfg)
-
 	gQInput := &sqs.GetQueueUrlInput{
 		QueueName: &queue,
 	}
 
+	ctx := context.TODO()
 	result, err := client.GetQueueUrl(ctx, gQInput)
 	if err != nil {
 		panic(err)
 	}
+
+	return &CloudQueue{
+		name:     "SQS aws",
+		client:   client,
+		queue:    queue,
+		queueUrl: result.QueueUrl,
+	}
+}
+
+func (self *CloudQueue) GetName() string {
+	return self.name
+}
+
+func (self *CloudQueue) Forward(payload string) {
 
 	sMInput := &sqs.SendMessageInput{
 		DelaySeconds: 10,
@@ -47,10 +62,11 @@ func toSqs(payload string) {
 			},
 		},
 		MessageBody: aws.String("Information about the NY Times fiction bestseller for the week of 12/11/2016."),
-		QueueUrl:    result.QueueUrl,
+		QueueUrl:    self.queueUrl,
 	}
 
-	resp, err := client.SendMessage(ctx, sMInput)
+	ctx := context.TODO()
+	resp, err := self.client.SendMessage(ctx, sMInput)
 	if err != nil {
 		fmt.Println("Got an error sending the message:")
 		fmt.Println(err)
