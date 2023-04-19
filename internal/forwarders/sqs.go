@@ -13,29 +13,18 @@ type (
 	TargetSQS struct {
 		name     string
 		client   *sqs.Client
-		queue    string
 		queueUrl *string
 	}
 )
 
-func NewTargetSQS(queue string, cfg aws.Config) *TargetSQS {
+func NewTargetSQS(queueUrl string, cfg aws.Config) *TargetSQS {
 
 	var client *sqs.Client = sqs.NewFromConfig(cfg)
-	gQInput := &sqs.GetQueueUrlInput{
-		QueueName: &queue,
-	}
-
-	ctx := context.TODO()
-	result, err := client.GetQueueUrl(ctx, gQInput)
-	if err != nil {
-		panic(err)
-	}
 
 	return &TargetSQS{
 		name:     "SQS aws",
 		client:   client,
-		queue:    queue,
-		queueUrl: result.QueueUrl,
+		queueUrl: &queueUrl,
 	}
 }
 
