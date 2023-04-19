@@ -8,16 +8,18 @@ import (
 
 type (
 	DistEventStore struct {
-		name   string
-		config *kafka.ConfigMap
+		name        string
+		targetTopic string
+		config      *kafka.ConfigMap
 	}
 )
 
-func NewDistEventStore(config *kafka.ConfigMap) *DistEventStore {
+func NewDistEventStore(config *kafka.ConfigMap, targetTopic string) *DistEventStore {
 
 	return &DistEventStore{
-		name:   "Kafka confluent",
-		config: config,
+		name:        "Kafka confluent",
+		targetTopic: targetTopic,
+		config:      config,
 	}
 }
 
@@ -49,10 +51,9 @@ func (self *DistEventStore) Forward(payload string) {
 	}()
 
 	// Produce messages to topic (asynchronously)
-	topic := "myTopic"
 	for _, word := range []string{"Welcome", "to", "the", "Confluent", "Kafka", "Golang", "client"} {
 		p.Produce(&kafka.Message{
-			TopicPartition: kafka.TopicPartition{Topic: &topic, Partition: kafka.PartitionAny},
+			TopicPartition: kafka.TopicPartition{Topic: &self.targetTopic, Partition: kafka.PartitionAny},
 			Value:          []byte(word),
 		}, nil)
 	}

@@ -32,12 +32,13 @@ func init() {
 		return fallback
 	}
 
+	kafkaTopic := getEnv("KAFKA_TARGET_TOPIC", "internal_test")
 	kafkaServers := getEnv("KAFKA_SERVERS", "localhost:9092")
 	TargetsLookUp[TARGET_KAFKA] = NewDistEventStore(&kafka.ConfigMap{
 		"bootstrap.servers":            kafkaServers,
 		"queue.buffering.max.messages": "1",
 		"queue.buffering.max.ms":       "1",
-	})
+	}, kafkaTopic)
 
 	ctx := context.TODO()
 	cfg, err := config.LoadDefaultConfig(ctx)
