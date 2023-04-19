@@ -47,5 +47,6 @@ func init() {
 		panic(err)
 	}
 
-	TargetsLookUp[TARGET_SQS] = NewTargetSQS("polito", cfg)
+	routingQueueURL := getEnv("ROUTING_QUEUE_URL", "http://localhost:4566/000000000000/sample-queue")
+	TargetsLookUp[TARGET_SQS] = NewTargetSQS(routingQueueURL, cfg)
 }
